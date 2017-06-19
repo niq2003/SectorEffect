@@ -4,14 +4,8 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Path;
 import android.graphics.Rect;
-import android.text.Layout;
+import android.text.StaticLayout;
 import android.util.AttributeSet;
-
-/**
- * @author niqiang
- * @version 1.0
- * @since 2017/6/16
- */
 
 public class SectorTextView extends android.support.v7.widget.AppCompatTextView {
 
@@ -89,15 +83,8 @@ public class SectorTextView extends android.support.v7.widget.AppCompatTextView 
             mPercent += ANIM_INTERVAL * ANIM_FACTOR / mDuring;
             canvas.save();
             canvas.clipPath(mPath);
-            int x = 0, y = getBaseline();
-            Layout layout = getLayout();
-            StringBuilder str = new StringBuilder(getText().toString());
-            int lineCount = getLineCount();
-            for (int i = 0; i < lineCount; i++) {
-                String line = str.subSequence(layout.getLineStart(i),layout.getLineEnd(i)).toString();
-                canvas.drawText(line, x, y, getPaint());
-                y += getPaint().descent() - getPaint().ascent();
-            }
+            StaticLayout sl = new StaticLayout(getText(), getPaint(), getWidth(), getLayout().getAlignment(), getLineSpacingMultiplier(), getLineSpacingExtra(), getIncludeFontPadding());
+            sl.draw(canvas);
             canvas.restore();
         }
         postInvalidateDelayed(ANIM_INTERVAL);
