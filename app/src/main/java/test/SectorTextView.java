@@ -9,52 +9,32 @@ import android.util.AttributeSet;
 
 public class SectorTextView extends android.support.v7.widget.AppCompatTextView {
 
-    private static final int ANIM_INTERVAL = 50;
-    private static float ANIM_FACTOR = 1.35f;
-
     private Path mPath = new Path();
     private float mPercent;
     private boolean mStart;
-    private int mDuring;
 
     public SectorTextView(Context context) {
-        super(context);
+        this(context, null);
     }
 
     public SectorTextView(Context context, AttributeSet attrs) {
-        super(context, attrs);
+        super(context, attrs, 0);
     }
 
     public SectorTextView(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
     }
 
-    long start;
-
-    public void startAnimation(int during) {
+    public void setPercent(float mPercent) {
+        this.mPercent = mPercent;
         mStart = true;
-        mDuring = during;
-        setWillNotDraw(false);
-        setLayerType(LAYER_TYPE_HARDWARE, null);
-        setVisibility(VISIBLE);
-        start = System.currentTimeMillis();
         invalidate();
     }
 
     @Override
     protected void onDraw(Canvas canvas) {
-        if (mPercent >= 1) {
-            super.onDraw(canvas);
-            mStart = false;
-            mPercent = 0;
-            return;
-        }
-        if (mStart) {
-            execute(canvas);
-        } else {
-            super.onDraw(canvas);
-            setVisibility(GONE);
-        }
+        if (!mStart) super.onDraw(canvas);
+        execute(canvas);
     }
 
     private void execute(Canvas canvas) {
@@ -79,14 +59,10 @@ public class SectorTextView extends android.support.v7.widget.AppCompatTextView 
         mPath.lineTo((float) (rect.right / 2 + radius * Math.sin(Math.PI * 2 * mPercent)),
                 (float) (rect.bottom / 2 - radius * Math.cos(Math.PI * 2 * mPercent)));
         mPath.close();
-        if (mPercent >= 0 && mPercent <= 1) {
-            mPercent += ANIM_INTERVAL * ANIM_FACTOR / mDuring;
-            canvas.save();
-            canvas.clipPath(mPath);
-            StaticLayout sl = new StaticLayout(getText(), getPaint(), getWidth(), getLayout().getAlignment(), getLineSpacingMultiplier(), getLineSpacingExtra(), getIncludeFontPadding());
-            sl.draw(canvas);
-            canvas.restore();
-        }
-        postInvalidateDelayed(ANIM_INTERVAL);
+        canvas.save();
+        canvas.clipPath(mPath);
+        StaticLayout sl = new StaticLayout(getText(), getPaint(), getWidth(), getLayout().getAlignment(), getLineSpacingMultiplier(), getLineSpacingExtra(), getIncludeFontPadding());
+        sl.draw(canvas);
+        canvas.restore();
     }
 }
