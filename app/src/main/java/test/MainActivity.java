@@ -1,5 +1,6 @@
 package test;
 
+import android.animation.ObjectAnimator;
 import android.os.Build;
 import android.os.Bundle;
 import android.support.annotation.RequiresApi;
@@ -9,6 +10,7 @@ import android.text.SpannableString;
 import android.text.style.CharacterStyle;
 import android.text.style.UnderlineSpan;
 import android.view.View;
+import android.view.animation.LinearInterpolator;
 import android.widget.ImageView;
 
 import com.test.R;
@@ -27,7 +29,10 @@ public class MainActivity extends AppCompatActivity {
                 imageView.setVisibility(View.VISIBLE);
                 SectorDrawable sectorDrawable = new SectorDrawable(imageView.getDrawable());
                 imageView.setImageDrawable(sectorDrawable);
-                sectorDrawable.startAnimation(5000);
+                ObjectAnimator animator = ObjectAnimator.ofFloat(sectorDrawable, "percent", 0, 1);
+                animator.setDuration(5000);
+                animator.setInterpolator(new LinearInterpolator());
+                animator.start();
             }
         });
 
@@ -40,7 +45,12 @@ public class MainActivity extends AppCompatActivity {
         findViewById(R.id.btn_text).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                textView.startAnimation(2000);
+                textView.setAlpha(1);
+                textView.setLayerType(View.LAYER_TYPE_HARDWARE, null);
+                ObjectAnimator animator = ObjectAnimator.ofFloat(textView, "percent", 0, 1);
+                animator.setDuration(3000);
+                animator.setInterpolator(new LinearInterpolator());
+                animator.start();
             }
         });
     }
