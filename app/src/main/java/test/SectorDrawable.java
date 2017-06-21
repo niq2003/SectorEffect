@@ -2,40 +2,21 @@ package test;
 
 
 import android.content.res.ColorStateList;
-import android.graphics.Canvas;
-import android.graphics.ColorFilter;
-import android.graphics.Path;
-import android.graphics.PorterDuff;
-import android.graphics.Rect;
-import android.graphics.RectF;
+import android.graphics.*;
 import android.graphics.drawable.Drawable;
 import android.os.Build;
-import android.os.SystemClock;
 import android.support.annotation.RequiresApi;
 
-public class SectorDrawable extends Drawable implements Drawable.Callback, Runnable {
-
-    private static final int ANIM_INTERVAL = 50;
-    private static float ANIM_FACTOR = 1.0f;
-
+public class SectorDrawable extends Drawable implements Drawable.Callback {
     private Drawable mDrawable;
     private Path mPath = new Path();
-    private float mPercent = -1;
-
-    private boolean mStart;
-    private int mDuring;
+    private float mPercent;
 
     public SectorDrawable(Drawable drawable) {
         this.mDrawable = drawable;
         if (drawable != null) {
             drawable.setCallback(this);
         }
-    }
-
-    public void startAnimation(int during) {
-        mDuring = during;
-        mPercent = 0;
-        start();
     }
 
     @Override
@@ -72,9 +53,6 @@ public class SectorDrawable extends Drawable implements Drawable.Callback, Runna
         }
         if (mPercent > 0.875f) {
             mPath.lineTo(0, 0);
-        }
-        if (mPercent > 1) {
-            mPercent = 1;
         }
         mPath.lineTo((float) (rect.right / 2 + radius * Math.sin(Math.PI * 2 * mPercent)),
                 (float) (rect.bottom / 2 - radius * Math.cos(Math.PI * 2 * mPercent)));
@@ -154,6 +132,23 @@ public class SectorDrawable extends Drawable implements Drawable.Callback, Runna
         return mDrawable.getIntrinsicWidth();
     }
 
+    /**
+     * 显示的区域范围
+     *
+     * @param percent 0至1
+     */
+    public void setPercent(float percent) {
+        if (percent > 1) {
+            percent = 1;
+        } else if (percent < 0) {
+            percent = 0;
+        }
+        if (percent != mPercent) {
+            this.mPercent = percent;
+            invalidateSelf();
+        }
+    }
+
     @Override
     public void invalidateDrawable(Drawable who) {
         final Callback callback = getCallback();
@@ -163,55 +158,19 @@ public class SectorDrawable extends Drawable implements Drawable.Callback, Runna
     }
 
     @Override
-    public void scheduleDrawable(Drawable drawable, Runnable runnable, long l){
-        invalidateDrawable(drawable);
-    }
-
-    @Override
-    public void unscheduleDrawable(Drawable drawable,Runnable runnable){
-        super.unscheduleSelf(runnable);
-    }
-
-    public void nextFrame(){
-        unscheduleSelf(this);
-        scheduleSelf(this, SystemClock.uptimeMillis() + ANIM_INTERVAL);
-    }
-
-    private void stop(){
-        mStart=false;
-        unscheduleSelf(this);
-    }
-
-    private void start(){
-        if(!mStart){
-            mStart = true;
-            nextFrame();
+    public void scheduleDrawable(Drawable who, Runnable what, long when) {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.scheduleDrawable(this, what, when);
         }
     }
 
     @Override
-    public void run(){
-        if (mPercent < 1) {
-            mPercent += ANIM_INTERVAL * ANIM_FACTOR / mDuring;
-            invalidateSelf();
-            nextFrame();
+    public void unscheduleDrawable(Drawable who, Runnable what) {
+        final Callback callback = getCallback();
+        if (callback != null) {
+            callback.unscheduleDrawable(this, what);
         }
     }
-
-//    @Override
-//    public void scheduleDrawable(Drawable who, Runnable what, long when) {
-//        final Callback callback = getCallback();
-//        if (callback != null) {
-//            callback.scheduleDrawable(this, what, when);
-//        }
-//    }
-
-//    @Override
-//    public void unscheduleDrawable(Drawable who, Runnable what) {
-//        final Callback callback = getCallback();
-//        if (callback != null) {
-//            callback.unscheduleDrawable(this, what);
-//        }
-//    }
 
 }
